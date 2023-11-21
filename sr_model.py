@@ -5,7 +5,7 @@ from keras.layers import UpSampling2D, LeakyReLU, Dense, Input, add, ReLU, Resha
 from keras.applications import VGG19
 from keras import models
 from keras.applications import VGG19
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 class SRGAN():
     def __init__(self):
@@ -123,7 +123,7 @@ class SRGAN():
         train_hr_batches = np.array(train_hr_batches)
 
         epochs = 10
-        for e in tqdm(range(epochs)):
+        for e in range(epochs):
             #print(f'{e}')
             gen_label = np.zeros((batch_size, 1))
             real_label = np.ones((batch_size,1))
