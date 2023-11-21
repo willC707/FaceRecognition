@@ -110,7 +110,7 @@ class SRGAN():
         return Model([lr_ip, hr_ip],[validity,gen_features])
 
     def train(self,train_lr,train_hr,test_lr,test_hr):
-        batch_size = 20
+        batch_size = 5
         train_lr_batches = []
         train_hr_batches = []
         for it in range(int(train_hr.shape[0] / batch_size)):
@@ -121,13 +121,15 @@ class SRGAN():
         train_lr_batches = np.array(train_lr_batches)
         train_hr_batches = np.array(train_hr_batches)
 
-        epochs = 100
+        epochs = 10
         for e in range(epochs):
+            print(f'{e}')
             gen_label = np.zeros((batch_size, 1))
             real_label = np.ones((batch_size,1))
             g_losses = []
             d_losses = []
             for b in range(len(train_hr_batches)):
+                print(f'{b}')
                 lr_imgs = train_lr_batches[b]
                 hr_imgs = train_hr_batches[b]
                 gen_imgs = self.generator.predict_on_batch(lr_imgs)
@@ -156,8 +158,8 @@ class SRGAN():
             d_loss = np.sum(d_losses, axis=0) / len(d_losses)
             print("epoch:", e+1 ,"g_loss:", g_loss, "d_loss:", d_loss)
 
-            label = np.ones((len(test_lr), 1))
-            test_features = self.vgg.predict(test_hr)
-            eval, _, _ = self.gan_model.evaluate([test_lr, test_hr], [label, test_features])
+            # label = np.ones((len(test_lr), 1))
+            # test_features = self.vgg.predict(test_hr)
+            # eval, _, _ = self.gan_model.evaluate([test_lr, test_hr], [label, test_features])
 
             #test_prediction = self.generator.predict_on_batch(test_lr)

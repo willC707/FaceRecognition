@@ -14,6 +14,38 @@ from skimage.transform import resize
 import matplotlib.pyplot as plt
 
 
+class data_loader():
+    def __init__(self,color):
+        self.lfw_people = fetch_lfw_people(data_home="./data", color=color, resize=None, min_faces_per_person=70,
+                                           funneled=False,)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.lfw_people.images,
+                                                                                self.lfw_people.target,
+                                                                                test_size=0.25,
+                                                                                random_state=42)
+        self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train,
+                                                                              test_size=0.10, random_state=42)
+
+    def get_train(self):
+        return self.X_train, self.y_train
+
+    def get_val(self):
+        return self.X_val, self.y_val
+
+    def get_test(self):
+        return self.X_test, self.y_test
+
+    def get_resized(self, split="train", size=[25,25,3]):
+        if split=="train":
+            X_resized = resize(self.X_train, (self.X_train.shape[0], size[0], size[1], size[2]))
+        if split=="test":
+            X_resized = resize(self.X_test, (self.X_test.shape[0], size[0], size[1], size[2]))
+        if split=="val":
+            X_resized = resize(self.X_val, (self.X_val.shape[0], size[0], size[1], size[2]))
+        return X_resized
+
+
+
+
 if __name__ == "__main__":
 
     print('Loading Data')
