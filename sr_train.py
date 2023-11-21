@@ -1,3 +1,5 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 from sklearn.datasets import fetch_lfw_people
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
@@ -8,6 +10,8 @@ from sr_model import  SRGAN
 from keras.layers import Input
 from PIL import Image
 from skimage.transform import resize
+from data_loader import data_loader
+
 
 def show_img(img, img2, t1, t2):
     fig, arr = plt.subplots(1, 2, figsize=(15, 15))
@@ -19,23 +23,18 @@ def show_img(img, img2, t1, t2):
 
 
 if __name__ == "__main__":
-    lfw_people = fetch_lfw_people(data_home="./data", resize=None,min_faces_per_person=70, color=True,slice_=None, funneled=False)
-    # print(lfw_people.DESCR)
+    dataloader = data_loader(color=True)
 
 
-    print(lfw_people.images[0].shape)
-    print(lfw_people.target[0])
-    # plots images
-
-    #show_img(lfw_people.images[0], lfw_people.images[1], lfw_people.target_names[0], lfw_people.target_names[1])
     target_shape_hr_img = [128, 128, 3]
     target_shape_lr_img = [25, 25, 3]
 
-    X_train, X_test, y_train, y_test = train_test_split(lfw_people.images, lfw_people.target, test_size=0.25,
-                                                        random_state=42)
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.10, random_state=42)
-    X_test_lr = resize(X_test, (X_test.shape[0], 25, 25, 3))
-    X_test_hr = resize(X_test, (X_test.shape[0], 225,225,3))
+    X_train, y_train = dataloader.get_train()
+    # X_test, y_test = dataloader.get_test()
+    X_val, y_val = dataloader.get_val()
+
+    X_test_lr = resize(X_val, (X_val.shape[0], 25, 25, 3))
+    X_test_hr = resize(X_val, (X_val.shape[0], 225,225,3))
     X_train_lr = resize(X_train, (X_train.shape[0], 25,25,3))
     X_train_hr = resize(X_train, (X_train.shape[0], 225,225,3))
 

@@ -5,6 +5,7 @@ from keras.layers import UpSampling2D, LeakyReLU, Dense, Input, add, ReLU, Resha
 from keras.applications import VGG19
 from keras import models
 from keras.applications import VGG19
+from tqdm import tqdm
 
 class SRGAN():
     def __init__(self):
@@ -110,7 +111,7 @@ class SRGAN():
         return Model([lr_ip, hr_ip],[validity,gen_features])
 
     def train(self,train_lr,train_hr,test_lr,test_hr):
-        batch_size = 5
+        batch_size = 1
         train_lr_batches = []
         train_hr_batches = []
         for it in range(int(train_hr.shape[0] / batch_size)):
@@ -122,32 +123,31 @@ class SRGAN():
         train_hr_batches = np.array(train_hr_batches)
 
         epochs = 10
-        for e in range(epochs):
-            print(f'{e}')
+        for e in tqdm(range(epochs)):
+            #print(f'{e}')
             gen_label = np.zeros((batch_size, 1))
             real_label = np.ones((batch_size,1))
             g_losses = []
             d_losses = []
-            for b in range(len(train_hr_batches)):
-                print(f'{b}')
-                lr_imgs = train_lr_batches[b]
-                hr_imgs = train_hr_batches[b]
-                gen_imgs = self.generator.predict_on_batch(lr_imgs)
+            for b in tqdm(range(len(train_hr_batches))):
+                # print(f'{b}')
+                # lr_imgs = train_lr_batches[b]
+                # hr_imgs = train_hr_batches[b]
+                gen_imgs = self.generator.predict_on_batch(train_lr_batches[b])
                 #Dont forget to make the discriminator trainable
                 self.discriminator.trainable = True
 
                 #Train the discriminator
-                d_loss_gen = self.discriminator.train_on_batch(gen_imgs,
-                  gen_label)
-                d_loss_real = self.discriminator.train_on_batch(hr_imgs,
+                d_loss_gen = self.discriminator.train_on_batch(gen_imgs,gen_label)
+                d_loss_real = self.discriminator.train_on_batch(train_hr_batches[b],
                   real_label)
                 self.discriminator.trainable = False
                 d_loss = 0.5 * np.add(d_loss_gen, d_loss_real)
-                image_features = self.vgg.predict(hr_imgs)
+                image_features = self.vgg.predict(train_hr_batches[b],verbose=0)
 
                 #Train the generator
-                g_loss, _, _ = self.gan_model.train_on_batch([lr_imgs, hr_imgs],
-                  [real_label, image_features])
+                g_loss, _, _ = self.gan_model.train_on_batch([train_lr_batches[b], train_hr_batches[b]],
+                  [real_label, image_features], )
 
                 d_losses.append(d_loss)
                 g_losses.append(g_loss)
