@@ -2,6 +2,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from keras.optimizers import Adam
 from keras.losses import categorical_crossentropy
+import keras
 
 
 class FacialRecognitionModel:
@@ -27,3 +28,9 @@ class FacialRecognitionModel:
         score = self._model.evaluate(X_test, y_test, verbose=0)
         print(f'Test loss: {score[0]:.4f}')
         print(f'Test accuracy: {score[1]:.4f}')
+
+    def save(self):
+        self._model.save("./models/fr_model.h5")
+
+    def load(self):
+        self._model = keras.models.load_model("./models/fr_model.h5")
